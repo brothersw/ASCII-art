@@ -45,12 +45,9 @@ def levelImage(scoreArr, fontScores):
 	return scoreArr * scaleRatio
 
 #match score to closest dictionary key
-def matchScore(score, fontScores):	
-	closest = 0
-	for i in fontScores.keys():
-		if(abs(i - score) < abs(closest - score)):
-			closest = i
-	return fontScores[closest]
+def matchScore(score, fontScores):
+    closest = min(fontScores.keys(), key=lambda x: abs(x - score))
+    return fontScores[closest]
 
 #loop over output scores to print image
 def printArt(scoreArr, fontScores):
@@ -66,7 +63,7 @@ def main():
 	npImg = np.array(img)
 	
 	scoreArr = scoreImage(npImg)
-	scoreArr = groupPixels(scoreArr, 9, 16)
+	scoreArr = groupPixels(scoreArr, 9,16)
 	fontScores = loadFont("UbuntuMono.pkl") #set me if generated new font
 	scoreArr = levelImage(scoreArr, fontScores)
 	printArt(scoreArr, fontScores)
