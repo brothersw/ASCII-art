@@ -30,6 +30,13 @@ def groupPixels(scoreArr, xBlock, yBlock):
     
 	return outArr
 
+#Auto scales text blocks from original image size
+#(2,1) text ratio for looking nice
+def scaleImage(imgShape, totalWidth):
+    x = int(imgShape[1] / totalWidth)
+    y = int(imgShape[0] / (totalWidth * 0.5))
+    return x, y
+
 #loads pickle font dictionary
 def loadFont(fontFile):
 	data = {}
@@ -49,24 +56,30 @@ def matchScore(score, fontScores):
     closest = min(fontScores.keys(), key=lambda x: abs(x - score))
     return fontScores[closest]
 
-#loop over output scores to print image
-def printArt(scoreArr, fontScores):
+#loop over output scores to return image string
+def getArt(scoreArr, fontScores):
+	out = ""
 	for y in scoreArr:
-		row = ""
 		for x in y:
-			row += matchScore(x, fontScores)
-		print(row)
+			out += matchScore(x, fontScores)
+		out += "\n"
+	return out
+
+def controlOverview(npImg, outWidth, fontFile):
+	scoreArr = scoreImage(npImg)
+	blocks = scaleImage(scoreArr.shape, outWidth)
+	scoreArr = groupPixels(scoreArr, blocks[0], blocks[1])
+	fontScores = loadFont(fontFile)
+	scoreArr = levelImage(scoreArr, fontScores)
+	return getArt(scoreArr, fontScores)
 
 def main():
 	imgFile = input("Enter the PNG image file name> ")
+	outWidth = int(input("How many characters wide do you want the output> "))
 	img = Image.open(imgFile)
 	npImg = np.array(img)
 	
-	scoreArr = scoreImage(npImg)
-	scoreArr = groupPixels(scoreArr, 9,16)
-	fontScores = loadFont("UbuntuMono.pkl") #set me if generated new font
-	scoreArr = levelImage(scoreArr, fontScores)
-	printArt(scoreArr, fontScores)
+	print(controlOverview(npImg, outWidth, "UbuntuMono.pkl"))
 
 if __name__ == "__main__":
 	main()
